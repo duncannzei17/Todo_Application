@@ -1,0 +1,213 @@
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+      <strong>Task Manager</strong>
+    </a>
+    
+    <div class="navbar-nav ms-auto">
+      <div class="nav-item btn-group">
+        <a class="nav-link dropdown-toggle" href="#" role="button" (click)="toggleDropdown($event)">
+          Welcome, {{ currentUser?.username }}
+        </a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="#" (click)="logout(); $event.preventDefault()">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h1 class="h3 mb-0">My Tasks</h1>
+      <p class="text-muted">Manage your daily tasks efficiently</p>
+    </div>
+    <div class="col-md-4 text-end">
+      <button class="btn btn-primary" (click)="openTaskModal()">
+        <i class="fas fa-plus me-2"></i>Add New Task
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="row" *ngIf="successMessage || errorMessage">
+    <div class="col-12">
+      <div class="alert alert-success alert-dismissible fade show" *ngIf="successMessage">
+        {{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+      <div class="alert alert-danger alert-dismissible fade show" *ngIf="errorMessage">
+        {{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center py-5" *ngIf="isLoading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading tasks...</p>
+  </div>
+
+  <!-- Tasks Grid -->
+  <div class="row" *ngIf="!isLoading">
+    <!-- Pending Tasks -->
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-warning text-dark">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-clock me-2"></i>Pending Tasks ({{ pendingTasks.length }})
+          </h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="pendingTasks.length === 0" class="text-center text-muted py-4">
+            <i class="fas fa-check-circle fa-3x mb-3 opacity-50"></i>
+            <p>No pending tasks! Great job!</p>
+          </div>
+          
+          <div *ngFor="let task of pendingTasks" class="task-item card mb-3 border-start border-warning border-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h6 class="card-title mb-2">{{ task.title }}</h6>
+                  <p class="card-text text-muted small" *ngIf="task.description">
+                    {{ task.description }}
+                  </p>
+                </div>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" (click)="toggleDropdown($event)">
+                    Actions
+                  </button>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#" (click)="toggleTaskStatus(task); $event.preventDefault()">
+                      <i class="fas fa-check me-2"></i>Mark Complete
+                    </a>
+                    <a class="dropdown-item" href="#" (click)="openTaskModal(task); $event.preventDefault()">
+                      <i class="fas fa-edit me-2"></i>Edit
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" href="#" (click)="deleteTask(task); $event.preventDefault()">
+                      <i class="fas fa-trash me-2"></i>Delete
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completed Tasks -->
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-success text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-check me-2"></i>Completed Tasks ({{ completedTasks.length }})
+          </h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="completedTasks.length === 0" class="text-center text-muted py-4">
+            <i class="fas fa-tasks fa-3x mb-3 opacity-50"></i>
+            <p>No completed tasks yet.</p>
+          </div>
+          
+          <div *ngFor="let task of completedTasks" class="task-item card mb-3 border-start border-success border-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h6 class="card-title mb-2 completed">{{ task.title }}</h6>
+                  <p class="card-text text-muted small completed" *ngIf="task.description">
+                    {{ task.description }}
+                  </p>
+                </div>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" (click)="toggleDropdown($event)">
+                    Actions
+                  </button>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#" (click)="toggleTaskStatus(task); $event.preventDefault()">
+                      <i class="fas fa-undo me-2"></i>Mark Pending
+                    </a>
+                    <a class="dropdown-item" href="#" (click)="openTaskModal(task); $event.preventDefault()">
+                      <i class="fas fa-edit me-2"></i>Edit
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" href="#" (click)="deleteTask(task); $event.preventDefault()">
+                      <i class="fas fa-trash me-2"></i>Delete
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div class="task-modal-overlay" *ngIf="showTaskModal" (click)="closeTaskModal()">
+  <div class="task-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="task-modal-content">
+      <div class="task-modal-header">
+        <h5 class="modal-title">{{ isEditMode ? 'Edit Task' : 'Add New Task' }}</h5>
+        <button type="button" class="btn-close" (click)="closeTaskModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="task-modal-body">
+        <form (ngSubmit)="saveTask()">
+          <div class="mb-3">
+            <label for="taskTitle" class="form-label">Title *</label>
+            <input type="text" 
+                   class="form-control" 
+                   id="taskTitle"
+                   [(ngModel)]="taskForm.title"
+                   name="title"
+                   required
+                   maxlength="255"
+                   placeholder="Enter task title"
+                   #titleInput>
+          </div>
+          
+          <div class="mb-3">
+            <label for="taskDescription" class="form-label">Description</label>
+            <textarea class="form-control" 
+                      id="taskDescription"
+                      [(ngModel)]="taskForm.description"
+                      name="description"
+                      rows="3"
+                      maxlength="1000"
+                      placeholder="Enter task description (optional)"></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label for="taskStatus" class="form-label">Status</label>
+            <select class="form-select" 
+                    id="taskStatus"
+                    [(ngModel)]="taskForm.status"
+                    name="status">
+              <option [value]="TaskStatus.PENDING">Pending</option>
+              <option [value]="TaskStatus.COMPLETED">Completed</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="task-modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeTaskModal()">Cancel</button>
+        <button type="button" 
+                class="btn btn-primary" 
+                (click)="saveTask()"
+                [disabled]="!taskForm.title.trim() || isLoading">
+          <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading"></span>
+          {{ isLoading ? 'Saving...' : (isEditMode ? 'Update Task' : 'Add Task') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
